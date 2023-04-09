@@ -4,14 +4,14 @@
 #include <turbojpeg.h>
 #include <vector>
 
-namespace fast_decompress
+namespace jet_decoder
 {
-class TurboDecoder
+class JetDecoder
 {
 public:
-  TurboDecoder();
+  JetDecoder();
 
-  ~TurboDecoder();
+  ~JetDecoder();
 
   void set_scale(int num, int denom);
 
@@ -36,4 +36,4 @@ private:
   mutable std::optional<Cache> cache_{std::nullopt};
 };
 
-}  // namespace fast_decompress
+}  // namespace jet_decoder

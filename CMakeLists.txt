@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(fast_decompress)
+project(jet_decoder)
 
 if(NOT CMAKE_CXX_STANDARD)
   set(CMAKE_CXX_STANDARD 17)
@@ -27,14 +27,14 @@ endif()
 
 # ===================================================
 # Executable
-ament_auto_add_library(${PROJECT_NAME} lib/fast_decompress.cpp)
+ament_auto_add_library(${PROJECT_NAME} lib/jet_decoder.cpp)
 target_include_directories(${PROJECT_NAME} PUBLIC include)
 target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS} ${TurboJPEG_LIBRARIES})
 
 # ===================================================
 # Executable
-set(TARGET_NAME decode_node)
-ament_auto_add_executable(${TARGET_NAME} src/decode_node.cpp)
+set(TARGET_NAME decoder_node)
+ament_auto_add_executable(${TARGET_NAME} src/decoder_node.cpp)
 target_include_directories(${TARGET_NAME} PUBLIC include)
 target_link_libraries(${TARGET_NAME} ${OpenCV_LIBS})
 

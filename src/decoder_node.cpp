@@ -1,5 +1,5 @@
-#include "fast_decompress/fast_decompress.hpp"
-#include "fast_decompress/timer.hpp"
+#include "jet_decoder/jet_decoder.hpp"
+#include "jet_decoder/timer.hpp"
 
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/compressed_image.hpp>
@@ -8,13 +8,11 @@
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
 
-namespace fast_decompress
-{
 class Decoder : public rclcpp::Node
 {
 public:
   using CompressedImage = sensor_msgs::msg::CompressedImage;
-  Decoder() : Node("fast_decompress"), use_jet_(declare_parameter<bool>("use_jet", true))
+  Decoder() : Node("jet_decoder"), use_jet_(declare_parameter<bool>("use_jet", true))
   {
     using std::placeholders::_1;
     auto qos = rclcpp::QoS(10).best_effort();
@@ -25,7 +23,7 @@ public:
   }
 
 private:
-  TurboDecoder decoder_;
+  jet_decoder::JetDecoder decoder_;
   rclcpp::Subscription<CompressedImage>::SharedPtr sub_compressed_image_;
   const bool use_jet_;
 
@@ -52,13 +50,12 @@ private:
     }
   }
 };
-}  // namespace fast_decompress
 
 
 int main(int argc, char* argv[])
 {
   rclcpp::init(argc, argv);
-  rclcpp::spin(std::make_shared<fast_decompress::Decoder>());
+  rclcpp::spin(std::make_shared<Decoder>());
   rclcpp::shutdown();
   return 0;
 }
