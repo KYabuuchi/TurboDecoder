@@ -1,5 +1,6 @@
+#include "fast_decompress/fast_decompress.hpp"
 #include "fast_decompress/timer.hpp"
-#include "fast_decompress/turbojpeg.hpp"
+
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/compressed_image.hpp>
 
@@ -7,37 +8,13 @@
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
 
-TurboDecoder decoder;
-
-cv::Mat decompress_image(const sensor_msgs::msg::CompressedImage& compressed_img)
-{
-  const std::string& format = compressed_img.format;
-  const std::string encoding = format.substr(0, format.find(";"));
-
-  constexpr int DECODE_RGB = 1;
-
-  {
-    Timer timer;
-    cv::Mat mat = decoder.decompress_using_cache(compressed_img.data);
-    std::cout << "jpegjet: " << timer << std::endl;
-  }
-
-  {
-    Timer timer;
-    cv::Mat mat = cv::imdecode(cv::Mat(compressed_img.data), DECODE_RGB);
-    cv::resize(mat, mat, cv::Size(), 0.25, 0.25);
-    std::cout << "cv::imdecode(): " << timer << std::endl;
-    return mat;
-  }
-}
-
 namespace fast_decompress
 {
 class Decoder : public rclcpp::Node
 {
 public:
   using CompressedImage = sensor_msgs::msg::CompressedImage;
-  Decoder() : Node("fast_decompress")
+  Decoder() : Node("fast_decompress"), use_jet_(declare_parameter<bool>("use_jet", true))
   {
     using std::placeholders::_1;
     auto qos = rclcpp::QoS(10).best_effort();
@@ -46,14 +23,31 @@ public:
   }
 
 private:
+  TurboDecoder decoder_;
   rclcpp::Subscription<CompressedImage>::SharedPtr sub_compressed_image_;
+  const bool use_jet_;
 
   void on_compressed_image(const CompressedImage& msg)
   {
-    RCLCPP_INFO_STREAM(get_logger(), "msg subscribed");
+    Timer timer;
     cv::Mat image = decompress_image(msg);
+    RCLCPP_INFO_STREAM(get_logger(), "image decompressed: " << timer);
+
     // cv::imshow("show", image);
     // cv::waitKey(10);
+  }
+
+  cv::Mat decompress_image(const sensor_msgs::msg::CompressedImage& compressed_img)
+  {
+    if (use_jet_) {
+      cv::Mat mat = decoder_.decompress_using_cache(compressed_img.data);
+      return mat;
+    } else {
+      constexpr int DECODE_RGB = 1;
+      cv::Mat mat = cv::imdecode(cv::Mat(compressed_img.data), DECODE_RGB);
+      cv::resize(mat, mat, cv::Size(), 0.25, 0.25);
+      return mat;
+    }
   }
 };
 }  // namespace fast_decompress
