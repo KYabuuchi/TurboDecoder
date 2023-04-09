@@ -1,8 +1,8 @@
 #include <iostream>
 #include <opencv2/core.hpp>
+#include <optional>
 #include <turbojpeg.h>
 #include <vector>
-
 class TurboDecoder
 {
 public:
@@ -40,6 +40,26 @@ public:
     std::cout << std::endl;
   }
 
+  cv::Mat decompress_using_cache(const std::vector<unsigned char>& jpeg_buf) const
+  {
+    if (!cache_) {
+      return decompress(jpeg_buf);
+    }
+
+    const int dst_width = cache_->dst_width;
+    const int dst_height = cache_->dst_height;
+
+    cv::Mat image_buf = cv::Mat(cv::Size(dst_width, dst_height), CV_8UC3);
+    const int pixel_format = TJPF_BGR;
+    const int flags = TJFLAG_FASTDCT;
+    if (tjDecompress2(tj_instance_, jpeg_buf.data(), jpeg_buf.size(), image_buf.data, dst_width, 0, dst_height, pixel_format, flags) < 0) {
+      throw std::runtime_error(tjGetErrorStr2(tj_instance_));
+    }
+
+
+    return image_buf;
+  }
+
   cv::Mat decompress(const std::vector<unsigned char>& jpeg_buf) const
   {
     int src_width, src_height;
@@ -59,11 +79,17 @@ public:
       throw std::runtime_error(tjGetErrorStr2(tj_instance_));
     }
 
-
+    cache_ = Cache{dst_width, dst_height};
     return image_buf;
   }
 
 private:
   tjscalingfactor scaling_factor_;
   tjhandle tj_instance_ = NULL;
+
+  struct Cache {
+    int dst_width;
+    int dst_height;
+  };
+  mutable std::optional<Cache> cache_{std::nullopt};
 };

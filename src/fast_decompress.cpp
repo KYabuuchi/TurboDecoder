@@ -11,36 +11,24 @@ TurboDecoder decoder;
 
 cv::Mat decompress_image(const sensor_msgs::msg::CompressedImage& compressed_img)
 {
-  cv::Mat raw_image;
-
   const std::string& format = compressed_img.format;
   const std::string encoding = format.substr(0, format.find(";"));
 
-  constexpr int DECODE_GRAY = 0;
   constexpr int DECODE_RGB = 1;
 
-  bool encoding_is_bayer = encoding.find("bayer") != std::string::npos;
-  if (!encoding_is_bayer) {
-
-    {
-      Timer timer;
-      cv::Mat mat = decoder.decompress(compressed_img.data);
-      std::cout << "jpegjet: " << timer << std::endl;
-      return mat;
-    }
-
-    {
-      Timer timer;
-      cv::Mat mat = cv::imdecode(cv::Mat(compressed_img.data), DECODE_RGB);
-      cv::resize(mat, mat, cv::Size(), 0.25, 0.25);
-      std::cout << "cv::imdecode(): " << timer << std::endl;
-      return mat;
-    }
+  {
+    Timer timer;
+    cv::Mat mat = decoder.decompress_using_cache(compressed_img.data);
+    std::cout << "jpegjet: " << timer << std::endl;
   }
 
-  std::cerr << encoding << " is not supported encoding" << std::endl;
-  std::cerr << "Please implement additional decoding in " << __FUNCTION__ << std::endl;
-  exit(EXIT_FAILURE);
+  {
+    Timer timer;
+    cv::Mat mat = cv::imdecode(cv::Mat(compressed_img.data), DECODE_RGB);
+    cv::resize(mat, mat, cv::Size(), 0.25, 0.25);
+    std::cout << "cv::imdecode(): " << timer << std::endl;
+    return mat;
+  }
 }
 
 namespace fast_decompress
@@ -64,8 +52,8 @@ private:
   {
     RCLCPP_INFO_STREAM(get_logger(), "msg subscribed");
     cv::Mat image = decompress_image(msg);
-    cv::imshow("show", image);
-    cv::waitKey(10);
+    // cv::imshow("show", image);
+    // cv::waitKey(10);
   }
 };
 }  // namespace fast_decompress
