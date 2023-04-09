@@ -1,5 +1,4 @@
-#include <iostream>
-#include <opencv2/core.hpp>
+#include <opencv2/core/mat.hpp>
 #include <optional>
 #include <turbojpeg.h>
 #include <vector>
@@ -15,7 +14,6 @@ public:
 
   void set_scale(int num, int denom);
 
-  void check_available_scale(int num, int denom) const;
   void print_available_scale() const;
 
   cv::Mat decompress(const std::vector<unsigned char>& jpeg_buf) const;

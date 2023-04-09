@@ -38,5 +38,10 @@ ament_auto_add_executable(${TARGET_NAME} src/decoder_node.cpp)
 target_include_directories(${TARGET_NAME} PUBLIC include)
 target_link_libraries(${TARGET_NAME} ${OpenCV_LIBS})
 
+set(TARGET_NAME comparator_node)
+ament_auto_add_executable(${TARGET_NAME} src/comparator_node.cpp)
+target_include_directories(${TARGET_NAME} PUBLIC include)
+target_link_libraries(${TARGET_NAME} ${OpenCV_LIBS})
+
 # ===================================================
 ament_auto_package()

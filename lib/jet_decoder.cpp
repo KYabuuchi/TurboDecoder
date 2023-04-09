@@ -1,4 +1,5 @@
 #include "jet_decoder/jet_decoder.hpp"
+#include <iostream>
 
 namespace jet_decoder
 {
@@ -58,9 +59,9 @@ cv::Mat JetDecoder::decompress_using_cache(const std::vector<unsigned char>& jpe
       throw std::runtime_error(tjGetErrorStr2(tj_instance_));
     }
 
-    const int dst_width = TJSCALED(src_width, scaling_factor_);
-    const int dst_height = TJSCALED(src_height, scaling_factor_);
-    cache_ = Cache{dst_width, dst_height};
+    cache_ = Cache{};
+    cache_->dst_width = TJSCALED(src_width, scaling_factor_);
+    cache_->dst_height = TJSCALED(src_height, scaling_factor_);
   }
 
   const int dst_width = cache_->dst_width;
@@ -68,11 +69,10 @@ cv::Mat JetDecoder::decompress_using_cache(const std::vector<unsigned char>& jpe
 
   cv::Mat image_buf = cv::Mat(cv::Size(dst_width, dst_height), CV_8UC3);
   const int pixel_format = TJPF_BGR;
-  const int flags = TJFLAG_FASTDCT;
+  const int flags = TJFLAG_FASTDCT;  // NOTE:
   if (tjDecompress2(tj_instance_, jpeg_buf.data(), jpeg_buf.size(), image_buf.data, dst_width, 0, dst_height, pixel_format, flags) < 0) {
     throw std::runtime_error(tjGetErrorStr2(tj_instance_));
   }
-
 
   return image_buf;
 }
@@ -91,7 +91,7 @@ cv::Mat JetDecoder::decompress(const std::vector<unsigned char>& jpeg_buf) const
 
   cv::Mat image_buf = cv::Mat(cv::Size(dst_width, dst_height), CV_8UC3);
   const int pixel_format = TJPF_BGR;
-  const int flags = TJFLAG_FASTDCT;
+  const int flags = TJFLAG_FASTDCT;  // NOTE:
   if (tjDecompress2(tj_instance_, jpeg_buf.data(), jpeg_buf.size(), image_buf.data, dst_width, 0, dst_height, pixel_format, flags) < 0) {
     throw std::runtime_error(tjGetErrorStr2(tj_instance_));
   }

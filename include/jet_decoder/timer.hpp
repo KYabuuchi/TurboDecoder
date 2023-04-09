@@ -2,6 +2,8 @@
 #include <chrono>
 #include <ostream>
 
+namespace jet_decoder
+{
 class Timer
 {
 public:
@@ -21,7 +23,7 @@ public:
     return std::chrono::duration_cast<std::chrono::microseconds>(dur).count();
   }
 
-  friend std::ostream & operator<<(std::ostream & os, Timer & t)
+  friend std::ostream& operator<<(std::ostream& os, Timer& t)
   {
     os << t.micro_seconds() / 1000.f << "[ms] ";
     return os;
@@ -30,3 +32,4 @@ public:
 private:
   std::chrono::time_point<std::chrono::system_clock> start;
 };
+}  // namespace jet_decoder
