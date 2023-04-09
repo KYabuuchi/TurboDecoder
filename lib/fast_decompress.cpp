@@ -6,11 +6,31 @@ TurboDecoder::TurboDecoder()
   if ((tj_instance_ = tjInitDecompress()) == NULL) {
     std::cerr << tjGetErrorStr2(tj_instance_) << std::endl;
   }
+  scaling_factor_.num = 1;
+  scaling_factor_.denom = 1;
+
+
+  if ((scaling_factors = tjGetScalingFactors(&num_scaling_factors)) == NULL) {
+    std::cerr << tjGetErrorStr2(tj_instance_) << std::endl;
+  }
+}
+
+void TurboDecoder::set_scale(int num, int denom)
+{
+  scaling_factor_.num = num;
+  scaling_factor_.denom = denom;
+
+  for (int i = 0; i < num_scaling_factors; i++) {
+    const int ref_num = scaling_factors[i].num;
+    const int ref_denom = scaling_factors[i].denom;
+
+    if ((ref_num == num) && (ref_denom == denom)) {
+      return;
+    }
+  }
 
   print_available_scale();
-
-  scaling_factor_.num = 1;
-  scaling_factor_.denom = 8;
+  throw std::runtime_error("invalid scale");
 }
 
 TurboDecoder::~TurboDecoder()
@@ -22,13 +42,6 @@ TurboDecoder::~TurboDecoder()
 
 void TurboDecoder::print_available_scale() const
 {
-  int num_scaling_factors = 0;
-  tjscalingfactor* scaling_factors = NULL;
-
-  if ((scaling_factors = tjGetScalingFactors(&num_scaling_factors)) == NULL) {
-    throw std::runtime_error(tjGetErrorStr2(tj_instance_));
-  }
-
   for (int i = 0; i < num_scaling_factors; i++) {
     std::cout << scaling_factors[i].num << "/" << scaling_factors[i].denom << ", ";
   }

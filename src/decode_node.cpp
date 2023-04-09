@@ -20,6 +20,8 @@ public:
     auto qos = rclcpp::QoS(10).best_effort();
     auto on_compressed_image = std::bind(&Decoder::on_compressed_image, this, _1);
     sub_compressed_image_ = create_subscription<CompressedImage>("/sensing/camera/traffic_light/image_raw/compressed", qos, on_compressed_image);
+
+    decoder_.set_scale(1, 8);
   }
 
 private:

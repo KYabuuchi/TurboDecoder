@@ -13,6 +13,9 @@ public:
 
   ~TurboDecoder();
 
+  void set_scale(int num, int denom);
+
+  void check_available_scale(int num, int denom) const;
   void print_available_scale() const;
 
   cv::Mat decompress(const std::vector<unsigned char>& jpeg_buf) const;
@@ -22,6 +25,9 @@ public:
 private:
   tjscalingfactor scaling_factor_;
   tjhandle tj_instance_ = NULL;
+  int num_scaling_factors = 0;
+  tjscalingfactor* scaling_factors = NULL;
+
 
   struct Cache {
     int dst_width;
