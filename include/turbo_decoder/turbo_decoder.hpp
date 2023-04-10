@@ -16,6 +16,11 @@ public:
 
   void print_available_scale() const;
 
+  void set_gray()
+  {
+    pixel_format_ = TJPF_GRAY;
+  }
+
   cv::Mat decompress(const std::vector<unsigned char>& jpeg_buf) const;
 
   cv::Mat decompress_using_cache(const std::vector<unsigned char>& jpeg_buf) const;
@@ -25,6 +30,8 @@ private:
   tjhandle tj_instance_ = NULL;
   int num_scaling_factors = 0;
   tjscalingfactor* scaling_factors = NULL;
+
+  int pixel_format_ = TJPF_BGR;
 
 
   struct Cache {

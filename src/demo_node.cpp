@@ -9,15 +9,15 @@
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
 
-class Comparator : public rclcpp::Node
+class DemoNode : public rclcpp::Node
 {
 public:
   using CompressedImage = sensor_msgs::msg::CompressedImage;
-  Comparator() : Node("jet_decoder")
+  DemoNode() : Node("jet_decoder")
   {
     using std::placeholders::_1;
     auto qos = rclcpp::QoS(10).best_effort();
-    auto on_compressed_image = std::bind(&Comparator::on_compressed_image, this, _1);
+    auto on_compressed_image = std::bind(&DemoNode::on_compressed_image, this, _1);
     sub_compressed_image_ = create_subscription<CompressedImage>("src_image", qos, on_compressed_image);
 
     {
@@ -79,7 +79,7 @@ private:
 int main(int argc, char* argv[])
 {
   rclcpp::init(argc, argv);
-  rclcpp::spin(std::make_shared<Comparator>());
+  rclcpp::spin(std::make_shared<DemoNode>());
   rclcpp::shutdown();
   return 0;
 }

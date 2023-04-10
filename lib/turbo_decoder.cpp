@@ -11,7 +11,6 @@ TurboDecoder::TurboDecoder()
   scaling_factor_.num = 1;
   scaling_factor_.denom = 1;
 
-
   if ((scaling_factors = tjGetScalingFactors(&num_scaling_factors)) == NULL) {
     std::cerr << tjGetErrorStr2(tj_instance_) << std::endl;
   }
@@ -67,10 +66,15 @@ cv::Mat TurboDecoder::decompress_using_cache(const std::vector<unsigned char>& j
   const int dst_width = cache_->dst_width;
   const int dst_height = cache_->dst_height;
 
-  cv::Mat image_buf = cv::Mat(cv::Size(dst_width, dst_height), CV_8UC3);
-  const int pixel_format = TJPF_BGR;
+  cv::Mat image_buf;
+  if (pixel_format_ == TJPF_GRAY) {
+    image_buf = cv::Mat(cv::Size(dst_width, dst_height), CV_8UC1);
+  } else {
+    image_buf = cv::Mat(cv::Size(dst_width, dst_height), CV_8UC3);
+  }
+
   const int flags = TJFLAG_FASTDCT;  // NOTE:
-  if (tjDecompress2(tj_instance_, jpeg_buf.data(), jpeg_buf.size(), image_buf.data, dst_width, 0, dst_height, pixel_format, flags) < 0) {
+  if (tjDecompress2(tj_instance_, jpeg_buf.data(), jpeg_buf.size(), image_buf.data, dst_width, 0, dst_height, pixel_format_, flags) < 0) {
     throw std::runtime_error(tjGetErrorStr2(tj_instance_));
   }
 
@@ -88,11 +92,15 @@ cv::Mat TurboDecoder::decompress(const std::vector<unsigned char>& jpeg_buf) con
   const int dst_width = TJSCALED(src_width, scaling_factor_);
   const int dst_height = TJSCALED(src_height, scaling_factor_);
 
+  cv::Mat image_buf;
+  if (pixel_format_ == TJPF_GRAY) {
+    image_buf = cv::Mat(cv::Size(dst_width, dst_height), CV_8UC1);
+  } else {
+    image_buf = cv::Mat(cv::Size(dst_width, dst_height), CV_8UC3);
+  }
 
-  cv::Mat image_buf = cv::Mat(cv::Size(dst_width, dst_height), CV_8UC3);
-  const int pixel_format = TJPF_BGR;
   const int flags = TJFLAG_FASTDCT;  // NOTE:
-  if (tjDecompress2(tj_instance_, jpeg_buf.data(), jpeg_buf.size(), image_buf.data, dst_width, 0, dst_height, pixel_format, flags) < 0) {
+  if (tjDecompress2(tj_instance_, jpeg_buf.data(), jpeg_buf.size(), image_buf.data, dst_width, 0, dst_height, pixel_format_, flags) < 0) {
     throw std::runtime_error(tjGetErrorStr2(tj_instance_));
   }
   return image_buf;
