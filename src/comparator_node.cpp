@@ -1,5 +1,5 @@
-#include "jet_decoder/jet_decoder.hpp"
-#include "jet_decoder/timer.hpp"
+#include "turbo_decoder/timer.hpp"
+#include "turbo_decoder/turbo_decoder.hpp"
 
 #include <iomanip>
 #include <rclcpp/rclcpp.hpp>
@@ -24,7 +24,7 @@ public:
   }
 
 private:
-  jet_decoder::JetDecoder decoder_;
+  turbo_decoder::TurboDecoder decoder_;
   rclcpp::Subscription<CompressedImage>::SharedPtr sub_compressed_image_;
   const int denom_;
 
@@ -53,7 +53,7 @@ private:
       cv::putText(image, ss.str(), cv::Point(20, 50), cv::FONT_HERSHEY_PLAIN, 2, cv::Scalar(0, 255, 255), 2);
     };
 
-    put_text(image1, time1, "jet_decode");
+    put_text(image1, time1, "turbo_decode");
     put_text(image2, time2, "cv::imdecode");
     RCLCPP_INFO_STREAM(get_logger(), "jet: " << time1 / 1000. << " imdecode:" << time2 / 1000.);
 

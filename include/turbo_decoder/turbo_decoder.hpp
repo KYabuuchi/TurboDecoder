@@ -3,14 +3,14 @@
 #include <turbojpeg.h>
 #include <vector>
 
-namespace jet_decoder
+namespace turbo_decoder
 {
-class JetDecoder
+class TurboDecoder
 {
 public:
-  JetDecoder();
+  TurboDecoder();
 
-  ~JetDecoder();
+  ~TurboDecoder();
 
   void set_scale(int num, int denom);
 
@@ -34,4 +34,4 @@ private:
   mutable std::optional<Cache> cache_{std::nullopt};
 };
 
-}  // namespace jet_decoder
+}  // namespace turbo_decoder

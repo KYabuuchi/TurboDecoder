@@ -27,12 +27,17 @@ endif()
 
 # ===================================================
 # Executable
-ament_auto_add_library(${PROJECT_NAME} lib/jet_decoder.cpp)
+ament_auto_add_library(${PROJECT_NAME} lib/turbo_decoder.cpp)
 target_include_directories(${PROJECT_NAME} PUBLIC include)
 target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS} ${TurboJPEG_LIBRARIES})
 
 # ===================================================
 # Executable
+set(TARGET_NAME cv_decoder_node)
+ament_auto_add_executable(${TARGET_NAME} src/cv_decoder_node.cpp)
+target_include_directories(${TARGET_NAME} PUBLIC include)
+target_link_libraries(${TARGET_NAME} ${OpenCV_LIBS})
+
 set(TARGET_NAME decoder_node)
 ament_auto_add_executable(${TARGET_NAME} src/decoder_node.cpp)
 target_include_directories(${TARGET_NAME} PUBLIC include)

@@ -1,9 +1,9 @@
-#include "jet_decoder/jet_decoder.hpp"
+#include "turbo_decoder/turbo_decoder.hpp"
 #include <iostream>
 
 namespace jet_decoder
 {
-JetDecoder::JetDecoder()
+TurboDecoder::TurboDecoder()
 {
   if ((tj_instance_ = tjInitDecompress()) == NULL) {
     std::cerr << tjGetErrorStr2(tj_instance_) << std::endl;
@@ -17,7 +17,7 @@ JetDecoder::JetDecoder()
   }
 }
 
-void JetDecoder::set_scale(int num, int denom)
+void TurboDecoder::set_scale(int num, int denom)
 {
   scaling_factor_.num = num;
   scaling_factor_.denom = denom;
@@ -35,14 +35,14 @@ void JetDecoder::set_scale(int num, int denom)
   throw std::runtime_error("invalid scale");
 }
 
-JetDecoder::~JetDecoder()
+TurboDecoder::~TurboDecoder()
 {
   if (tjDestroy(tj_instance_) == -1) {
     std::cerr << tjGetErrorStr2(tj_instance_) << std::endl;
   }
 }
 
-void JetDecoder::print_available_scale() const
+void TurboDecoder::print_available_scale() const
 {
   for (int i = 0; i < num_scaling_factors; i++) {
     std::cout << scaling_factors[i].num << "/" << scaling_factors[i].denom << ", ";
@@ -50,7 +50,7 @@ void JetDecoder::print_available_scale() const
   std::cout << std::endl;
 }
 
-cv::Mat JetDecoder::decompress_using_cache(const std::vector<unsigned char>& jpeg_buf) const
+cv::Mat TurboDecoder::decompress_using_cache(const std::vector<unsigned char>& jpeg_buf) const
 {
   if (!cache_) {
     int src_width, src_height;
@@ -77,7 +77,7 @@ cv::Mat JetDecoder::decompress_using_cache(const std::vector<unsigned char>& jpe
   return image_buf;
 }
 
-cv::Mat JetDecoder::decompress(const std::vector<unsigned char>& jpeg_buf) const
+cv::Mat TurboDecoder::decompress(const std::vector<unsigned char>& jpeg_buf) const
 {
   int src_width, src_height;
   int src_sub_sample, src_color_space;
