@@ -45,21 +45,24 @@ private:
     cv::Mat image;
 
     if (use_imdecode_) {
-      const std::string& format = msg.format;
-      const std::string encoding = format.substr(0, format.find(";"));
       image = cv::imdecode(cv::Mat(msg.data), cv::IMREAD_GRAYSCALE);
-      if (encoding == "bayer_rggb8")
-        cv::cvtColor(image, image, cv::COLOR_BayerBG2BGR);
-      else if (encoding == "bayer_bggr8")
-        cv::cvtColor(image, image, cv::COLOR_BayerRG2BGR);
-      else if (encoding == "bayer_grbg8")
-        cv::cvtColor(image, image, cv::COLOR_BayerGB2BGR);
-      else if (encoding == "bayer_gbrg8")
-        cv::cvtColor(image, image, cv::COLOR_BayerGR2BGR);
-      cv::resize(image, image, cv::Size(), scale_ratio_, scale_ratio_);
     } else {
       image = decoder_.decompress_using_cache(msg.data);
+    }
+
+    const std::string& format = msg.format;
+    const std::string encoding = format.substr(0, format.find(";"));
+    if (encoding == "bayer_rggb8")
       cv::cvtColor(image, image, cv::COLOR_BayerBG2BGR);
+    else if (encoding == "bayer_bggr8")
+      cv::cvtColor(image, image, cv::COLOR_BayerRG2BGR);
+    else if (encoding == "bayer_grbg8")
+      cv::cvtColor(image, image, cv::COLOR_BayerGB2BGR);
+    else if (encoding == "bayer_gbrg8")
+      cv::cvtColor(image, image, cv::COLOR_BayerGR2BGR);
+
+    if (use_imdecode_) {
+      cv::resize(image, image, cv::Size(), scale_ratio_, scale_ratio_);
     }
 
     RCLCPP_INFO_STREAM(get_logger(), "image decompressed: " << timer);
