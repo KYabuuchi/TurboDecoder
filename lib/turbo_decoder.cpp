@@ -1,7 +1,7 @@
 #include "turbo_decoder/turbo_decoder.hpp"
 #include <iostream>
 
-namespace jet_decoder
+namespace turbo_decoder
 {
 TurboDecoder::TurboDecoder()
 {
@@ -99,4 +99,4 @@ cv::Mat TurboDecoder::decompress(const std::vector<unsigned char>& jpeg_buf) con
 }
 
 
-}  // namespace jet_decoder
+}  // namespace turbo_decoder
