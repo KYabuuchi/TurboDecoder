@@ -1,0 +1,22 @@
+<launch>
+    <arg name="src_image" default="/sensing/camera/traffic_light/image_raw/compressed"/>
+    <arg name="scale_num" default="1"/>
+    <arg name="scale_denom" default="1"/>
+    <arg name="imshow" default="true"/>
+
+    <node name="turbo_decode_node" pkg="turbo_decoder" exec="decoder_node" output="screen">
+        <remap from="src_image" to="$(var src_image)"/>
+        <param name="scale_num" value="$(var scale_num)"/>
+        <param name="scale_denom" value="$(var scale_denom)"/>
+        <param name="use_imshow" value="$(var imshow)"/>
+        <param name="use_imdecode" value="false"/>
+    </node>
+
+    <node name="opencv_decode_node" pkg="turbo_decoder" exec="decoder_node" output="screen">
+        <remap from="src_image" to="$(var src_image)"/>
+        <param name="scale_num" value="$(var scale_num)"/>
+        <param name="scale_denom" value="$(var scale_denom)"/>
+        <param name="use_imshow" value="$(var imshow)"/>
+        <param name="use_imdecode" value="true"/>
+    </node>
+</launch>

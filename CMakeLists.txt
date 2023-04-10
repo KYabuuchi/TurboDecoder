@@ -49,4 +49,4 @@ target_include_directories(${TARGET_NAME} PUBLIC include)
 target_link_libraries(${TARGET_NAME} ${OpenCV_LIBS})
 
 # ===================================================
-ament_auto_package()
+ament_auto_package(INSTALL_TO_SHARE launch)
