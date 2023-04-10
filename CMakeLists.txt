@@ -33,18 +33,13 @@ target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS} ${TurboJPEG_LIBRARIES})
 
 # ===================================================
 # Executable
-set(TARGET_NAME cv_decoder_node)
-ament_auto_add_executable(${TARGET_NAME} src/cv_decoder_node.cpp)
-target_include_directories(${TARGET_NAME} PUBLIC include)
-target_link_libraries(${TARGET_NAME} ${OpenCV_LIBS})
-
 set(TARGET_NAME decoder_node)
 ament_auto_add_executable(${TARGET_NAME} src/decoder_node.cpp)
 target_include_directories(${TARGET_NAME} PUBLIC include)
 target_link_libraries(${TARGET_NAME} ${OpenCV_LIBS})
 
-set(TARGET_NAME comparator_node)
-ament_auto_add_executable(${TARGET_NAME} src/comparator_node.cpp)
+set(TARGET_NAME demo_node)
+ament_auto_add_executable(${TARGET_NAME} src/demo_node.cpp)
 target_include_directories(${TARGET_NAME} PUBLIC include)
 target_link_libraries(${TARGET_NAME} ${OpenCV_LIBS})
 

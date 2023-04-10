@@ -14,6 +14,8 @@ I believe the following command will install `libjpeg-turbo`
 
 ## How to run
 
+### two nodes
+
 #### x1 decompression with visualization
 
 `ros2 launch turbo_decoder compare.launch.xm show:=true`
@@ -25,3 +27,9 @@ I believe the following command will install `libjpeg-turbo`
 #### 1/4 decompression with visualization
 
 `ros2 launch turbo_decoder compare.launch.xml scale_denom:=4 show:true`
+
+### one node
+
+#### 1/4 decompression with visualization
+
+`ros2 launch turbo_decoder demo.launch.xml scale_denom:=4`

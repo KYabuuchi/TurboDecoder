@@ -13,20 +13,25 @@ class Comparator : public rclcpp::Node
 {
 public:
   using CompressedImage = sensor_msgs::msg::CompressedImage;
-  Comparator() : Node("jet_comparator"), denom_(4)
+  Comparator() : Node("jet_decoder")
   {
     using std::placeholders::_1;
     auto qos = rclcpp::QoS(10).best_effort();
     auto on_compressed_image = std::bind(&Comparator::on_compressed_image, this, _1);
-    sub_compressed_image_ = create_subscription<CompressedImage>("/sensing/camera/traffic_light/image_raw/compressed", qos, on_compressed_image);
+    sub_compressed_image_ = create_subscription<CompressedImage>("src_image", qos, on_compressed_image);
 
-    decoder_.set_scale(1, denom_);
+    {
+      const int num = declare_parameter<int>("scale_num");
+      const int denom = declare_parameter<int>("scale_denom");
+      decoder_.set_scale(num, denom);
+      scale_ratio_ = static_cast<double>(num) / static_cast<double>(denom);
+    }
   }
 
 private:
+  double scale_ratio_;
   turbo_decoder::TurboDecoder decoder_;
   rclcpp::Subscription<CompressedImage>::SharedPtr sub_compressed_image_;
-  const int denom_;
 
   void on_compressed_image(const CompressedImage& msg)
   {
@@ -42,7 +47,7 @@ private:
     // (2) cv::imdecode
     timer.reset();
     cv::Mat image2 = cv::imdecode(cv::Mat(msg.data), cv::IMREAD_COLOR);
-    cv::resize(image2, image2, cv::Size(), 1.0 / denom_, 1.0 / denom_);
+    cv::resize(image2, image2, cv::Size(), scale_ratio_, scale_ratio_);
     const long time2 = timer.micro_seconds();
 
 
@@ -56,6 +61,12 @@ private:
     put_text(image1, time1, "turbo_decode");
     put_text(image2, time2, "cv::imdecode");
     RCLCPP_INFO_STREAM(get_logger(), "jet: " << time1 / 1000. << " imdecode:" << time2 / 1000.);
+
+    if (image1.size() != image2.size()) {
+      using namespace std::literals::chrono_literals;
+      RCLCPP_WARN_STREAM_THROTTLE(get_logger(), *get_clock(), 1000, "scale does not match");
+      cv::resize(image1, image1, image2.size());
+    }
 
     cv::Mat concat_image;
     cv::hconcat(image1, image2, concat_image);
