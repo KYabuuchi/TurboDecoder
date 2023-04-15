@@ -59,6 +59,8 @@ private:
   turbo_decoder::TurboDecoder decoder_;
   rclcpp::Subscription<CompressedImage>::SharedPtr sub_compressed_image_;
   rclcpp::Publisher<Float32>::SharedPtr pub_proc_time_;
+  int sum_count_ = 0;
+  int sum_time_us_ = 0;
 
   void on_compressed_image(const CompressedImage& msg)
   {
@@ -69,7 +71,9 @@ private:
     else
       image = decompress_by_turbo(msg);
 
-    RCLCPP_INFO_STREAM(get_logger(), "image decompressed: " << timer);
+    sum_time_us_ += timer.micro_seconds();
+    sum_count_++;
+    RCLCPP_INFO_STREAM(get_logger(), "average of " << sum_count_ << " times: " << (sum_time_us_ * 1e-3f / sum_count_) << " ms");
 
     {
       Float32 time_msg;
