@@ -41,7 +41,7 @@ private:
 
     // (1) turbo_decoder
     turbo_decoder::Timer timer;
-    cv::Mat image1 = decoder_.decompress_using_cache(msg.data);
+    cv::Mat image1 = decoder_.decompress(msg.data);
     const long time1 = timer.micro_seconds();
 
     // (2) cv::imdecode

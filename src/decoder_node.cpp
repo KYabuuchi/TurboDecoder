@@ -72,7 +72,7 @@ private:
       }
       cv::resize(image, image, cv::Size(), scale_ratio_, scale_ratio_);
     } else {
-      image = decoder_.decompress_crop(msg.data);
+      image = decoder_.decompress(msg.data);
       if (is_bayer_) {
         image = turbo_decoder::convert_from_bayer(image, msg.format);
       }

@@ -16,34 +16,31 @@ public:
 
   void set_crop_range(int x, int y, int w, int h);
 
-  void print_available_scale() const;
-
   void set_gray()
   {
     pixel_format_ = TJPF_GRAY;
   }
 
-  cv::Mat decompress_crop(const std::vector<unsigned char>& jpeg_buf);
-
-  cv::Mat decompress(const std::vector<unsigned char>& jpeg_buf) const;
-
-  cv::Mat decompress_using_cache(const std::vector<unsigned char>& jpeg_buf) const;
+  cv::Mat decompress(const std::vector<unsigned char>& jpeg_buf);
 
 private:
   tjscalingfactor scaling_factor_;
   tjhandle tj_instance_ = NULL;
-  int num_scaling_factors = 0;
-  tjscalingfactor* scaling_factors = NULL;
 
   int pixel_format_ = TJPF_BGR;
 
   std::optional<tjtransform> xform_{std::nullopt};
 
-  struct Cache {
-    int dst_width;
-    int dst_height;
-  };
-  mutable std::optional<Cache> cache_{std::nullopt};
+  cv::Mat create_image_buffer(int width, int height) const
+  {
+    cv::Mat image_buf;
+    if (pixel_format_ == TJPF_GRAY) {
+      image_buf = cv::Mat(cv::Size(width, height), CV_8UC1);
+    } else {
+      image_buf = cv::Mat(cv::Size(width, height), CV_8UC3);
+    }
+    return image_buf;
+  }
 };
 
 }  // namespace turbo_decoder
