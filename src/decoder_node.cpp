@@ -1,3 +1,4 @@
+#include "turbo_decoder/cvt_color.hpp"
 #include "turbo_decoder/timer.hpp"
 #include "turbo_decoder/turbo_decoder.hpp"
 
@@ -15,7 +16,8 @@ public:
 
   Decoder() : Node("jet_decoder"),
               use_imdecode_(declare_parameter<bool>("use_imdecode", false)),
-              use_imshow_(declare_parameter<bool>("use_imshow", false))
+              use_imshow_(declare_parameter<bool>("use_imshow", false)),
+              is_bayer_(declare_parameter<bool>("is_bayer", false))
   {
     using std::placeholders::_1;
     auto qos = rclcpp::QoS(10).best_effort();
@@ -37,11 +39,16 @@ public:
         crop_range_ = cv::Rect2i(range[0], range[1], range[2], range[3]);
       }
     }
+
+    if (is_bayer_) {
+      decoder_.set_gray();
+    }
   }
 
 private:
   const bool use_imdecode_;
   const bool use_imshow_;
+  const bool is_bayer_;
   double scale_ratio_;
   std::optional<cv::Rect2i> crop_range_{std::nullopt};
   turbo_decoder::TurboDecoder decoder_;
@@ -53,7 +60,13 @@ private:
     cv::Mat image;
 
     if (use_imdecode_) {
-      image = cv::imdecode(cv::Mat(msg.data), cv::IMREAD_COLOR);
+      if (is_bayer_) {
+        image = cv::imdecode(cv::Mat(msg.data), cv::IMREAD_GRAYSCALE);
+        image = turbo_decoder::convert_from_bayer(image, msg.format);
+      } else {
+        image = cv::imdecode(cv::Mat(msg.data), cv::IMREAD_COLOR);
+      }
+
       if (crop_range_) {
         image = image(crop_range_.value());
       }
@@ -61,6 +74,7 @@ private:
     } else {
       image = decoder_.decompress_crop(msg.data);
     }
+
     RCLCPP_INFO_STREAM(get_logger(), "image decompressed: " << timer);
 
     if (use_imshow_) {

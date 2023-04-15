@@ -14,17 +14,7 @@ public:
 
   void set_scale(int num, int denom);
 
-  void set_crop_range(int x, int y, int w, int h)
-  {
-    tjtransform xform{};
-    xform.r.x = x;
-    xform.r.y = y;
-    xform.r.w = w;
-    xform.r.h = h;
-    xform.options |= TJXOPT_TRIM;
-    xform.options |= TJXOPT_CROP;
-    xform_ = xform;
-  }
+  void set_crop_range(int x, int y, int w, int h);
 
   void print_available_scale() const;
 

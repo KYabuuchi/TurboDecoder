@@ -4,14 +4,17 @@
     <arg name="scale_denom" default="2"/>
     <arg name="imshow" default="false"/>
     <arg name="crop_range" default="[2240,1360,640,480]"/>
+    <arg name="bayer" default="true"/>
 
     <node name="turbo_decode_node" pkg="turbo_decoder" exec="decoder_node" output="screen">
         <remap from="src_image" to="$(var src_image)"/>
         <param name="scale_num" value="$(var scale_num)"/>
         <param name="scale_denom" value="$(var scale_denom)"/>
         <param name="use_imshow" value="$(var imshow)"/>
-        <param name="use_imdecode" value="false"/>
         <param name="crop_range" value="$(var crop_range)"/>
+        <param name="bayer" value="$(var bayer)"/>
+
+        <param name="use_imdecode" value="false"/>
     </node>
 
     <node name="opencv_decode_node" pkg="turbo_decoder" exec="decoder_node" output="screen">
@@ -19,7 +22,9 @@
         <param name="scale_num" value="$(var scale_num)"/>
         <param name="scale_denom" value="$(var scale_denom)"/>
         <param name="use_imshow" value="$(var imshow)"/>
-        <param name="use_imdecode" value="true"/>
         <param name="crop_range" value="$(var crop_range)"/>
+        <param name="bayer" value="$(var bayer)"/>
+
+        <param name="use_imdecode" value="true"/>
     </node>
 </launch>

@@ -38,6 +38,25 @@ void TurboDecoder::set_scale(int num, int denom)
   throw std::runtime_error("invalid scale");
 }
 
+void TurboDecoder::set_crop_range(int x, int y, int w, int h)
+{
+  if ((x % 16 != 0) || (y % 16 != 0) || (w % 16 != 0) || (h % 16 != 0)) {
+    std::cerr << "crop range must be consisted by multiple of 16" << std::endl;
+    std::cerr << "e.g. x=16, y=32, w=640, h=480" << std::endl;
+    throw std::runtime_error("invalid crop range");
+  }
+
+  tjtransform xform{};
+  xform.r.x = x;
+  xform.r.y = y;
+  xform.r.w = w;
+  xform.r.h = h;
+  xform.options |= TJXOPT_TRIM;
+  xform.options |= TJXOPT_CROP;
+  xform_ = xform;
+}
+
+
 TurboDecoder::~TurboDecoder()
 {
   if (tjDestroy(tj_instance_) == -1) {
