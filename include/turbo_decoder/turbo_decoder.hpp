@@ -14,6 +14,18 @@ public:
 
   void set_scale(int num, int denom);
 
+  void set_crop_range(int x, int y, int w, int h)
+  {
+    tjtransform xform{};
+    xform.r.x = x;
+    xform.r.y = y;
+    xform.r.w = w;
+    xform.r.h = h;
+    xform.options |= TJXOPT_TRIM;
+    xform.options |= TJXOPT_CROP;
+    xform_ = xform;
+  }
+
   void print_available_scale() const;
 
   void set_gray()
@@ -21,7 +33,7 @@ public:
     pixel_format_ = TJPF_GRAY;
   }
 
-  cv::Mat decompress_crop(const std::vector<unsigned char>& jpeg_buf) const;
+  cv::Mat decompress_crop(const std::vector<unsigned char>& jpeg_buf);
 
   cv::Mat decompress(const std::vector<unsigned char>& jpeg_buf) const;
 
@@ -35,6 +47,7 @@ private:
 
   int pixel_format_ = TJPF_BGR;
 
+  std::optional<tjtransform> xform_{std::nullopt};
 
   struct Cache {
     int dst_width;

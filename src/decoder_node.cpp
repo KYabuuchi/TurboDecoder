@@ -28,12 +28,22 @@ public:
       decoder_.set_scale(num, denom);
       scale_ratio_ = static_cast<double>(num) / static_cast<double>(denom);
     }
+
+    {
+      declare_parameter<std::vector<int>>("crop_range");
+      std::vector<int64_t> range = get_parameter("crop_range").as_integer_array();
+      if (range.size() == 4) {
+        decoder_.set_crop_range(range[0], range[1], range[2], range[3]);
+        crop_range_ = cv::Rect2i(range[0], range[1], range[2], range[3]);
+      }
+    }
   }
 
 private:
   const bool use_imdecode_;
   const bool use_imshow_;
   double scale_ratio_;
+  std::optional<cv::Rect2i> crop_range_{std::nullopt};
   turbo_decoder::TurboDecoder decoder_;
   rclcpp::Subscription<CompressedImage>::SharedPtr sub_compressed_image_;
 
@@ -44,9 +54,12 @@ private:
 
     if (use_imdecode_) {
       image = cv::imdecode(cv::Mat(msg.data), cv::IMREAD_COLOR);
+      if (crop_range_) {
+        image = image(crop_range_.value());
+      }
       cv::resize(image, image, cv::Size(), scale_ratio_, scale_ratio_);
     } else {
-      image = decoder_.decompress_using_cache(msg.data);
+      image = decoder_.decompress_crop(msg.data);
     }
     RCLCPP_INFO_STREAM(get_logger(), "image decompressed: " << timer);
 

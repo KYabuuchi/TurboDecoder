@@ -12,6 +12,13 @@ I believe the following command will install `libjpeg-turbo`
 
 </div></details>
 
+## Supported options
+
+|  source |  x1  | scale | crop | crop & scale |
+| ------- | ---- | ----- | ---- | ------------ |
+|  RGB    |  O   |  O    |  O   |      O       |
+|  Bayer  |  O   |       |  O   |              |
+
 ## How to run
 
 ### two nodes

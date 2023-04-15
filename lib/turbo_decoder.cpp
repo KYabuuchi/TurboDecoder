@@ -85,31 +85,34 @@ cv::Mat TurboDecoder::decompress_using_cache(const std::vector<unsigned char>& j
   return image_buf;
 }
 
-cv::Mat TurboDecoder::decompress_crop(const std::vector<unsigned char>& jpeg_buf) const
+cv::Mat TurboDecoder::decompress_crop(const std::vector<unsigned char>& jpeg_buf)
 {
-  tjtransform xform{};
-  xform.r.x = 160;
-  xform.r.y = 640;
-  xform.r.w = 640;
-  xform.r.h = 480;
-  xform.options |= TJXOPT_CROP;
-
   unsigned char* dst_buf = NULL;
   unsigned long dst_size = 0;
 
   const int flags = TJFLAG_FASTDCT;  // NOTE:
 
-  xform.options |= TJXOPT_TRIM;
-  if (tjTransform(tj_instance_, jpeg_buf.data(), jpeg_buf.size(), 1, &dst_buf, &dst_size, &xform, flags) < 0) {
-    tjFree(dst_buf);
-    throw std::runtime_error(tjGetErrorStr2(tj_instance_));
-  }
-
   int src_width, src_height;
   int src_sub_sample, src_color_space;
-  if (tjDecompressHeader3(tj_instance_, dst_buf, dst_size, &src_width, &src_height, &src_sub_sample, &src_color_space) < 0) {
-    throw std::runtime_error(tjGetErrorStr2(tj_instance_));
+
+  if (xform_) {
+    if (tjTransform(tj_instance_, jpeg_buf.data(), jpeg_buf.size(), 1, &dst_buf, &dst_size, &(*xform_), flags) < 0) {
+      tjFree(dst_buf);
+      throw std::runtime_error(tjGetErrorStr2(tj_instance_));
+    }
+
+    if (tjDecompressHeader3(tj_instance_, dst_buf, dst_size, &src_width, &src_height, &src_sub_sample, &src_color_space) < 0) {
+      throw std::runtime_error(tjGetErrorStr2(tj_instance_));
+    }
   }
+  // TODO:
+  //  else {
+  //   if (tjDecompressHeader3(tj_instance_, jpeg_buf.data(), jpeg_buf.size(), &src_width, &src_height, &src_sub_sample, &src_color_space) < 0) {
+  //     throw std::runtime_error(tjGetErrorStr2(tj_instance_));
+  //   }
+  //   dst_buf = jpeg_buf.data();
+  //   dst_size = jpeg_buf.size();
+  // }
 
   const int dst_width = TJSCALED(src_width, scaling_factor_);
   const int dst_height = TJSCALED(src_height, scaling_factor_);
