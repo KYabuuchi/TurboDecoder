@@ -18,6 +18,13 @@ TurboDecoder::TurboDecoder()
   scaling_factor_.denom = 1;
 }
 
+TurboDecoder::~TurboDecoder()
+{
+  if (tjDestroy(tj_instance_) == -1) {
+    std::cerr << tjGetErrorStr2(tj_instance_) << std::endl;
+  }
+}
+
 void TurboDecoder::set_scale(int num, int denom)
 {
   scaling_factor_.num = num;
@@ -27,7 +34,7 @@ void TurboDecoder::set_scale(int num, int denom)
   tjscalingfactor* scaling_factors = NULL;
   int num_scaling_factors;
   if ((scaling_factors = tjGetScalingFactors(&num_scaling_factors)) == NULL) {
-    std::cerr << tjGetErrorStr2(tj_instance_) << std::endl;
+    throw std::runtime_error(tjGetErrorStr2(tj_instance_));
   }
 
   // Try to match query wtih avalibale scaling factors
@@ -64,14 +71,6 @@ void TurboDecoder::set_crop_range(int x, int y, int w, int h)
   xform.options |= TJXOPT_TRIM;
   xform.options |= TJXOPT_CROP;
   xform_ = xform;
-}
-
-
-TurboDecoder::~TurboDecoder()
-{
-  if (tjDestroy(tj_instance_) == -1) {
-    std::cerr << tjGetErrorStr2(tj_instance_) << std::endl;
-  }
 }
 
 cv::Mat TurboDecoder::decompress(const std::vector<unsigned char>& jpeg_buf)

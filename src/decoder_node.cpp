@@ -1,4 +1,4 @@
-#include "turbo_decoder/cvt_color.hpp"
+#include "turbo_decoder/from_bayer.hpp"
 #include "turbo_decoder/timer.hpp"
 #include "turbo_decoder/turbo_decoder.hpp"
 
@@ -24,6 +24,11 @@ public:
     auto on_compressed_image = std::bind(&Decoder::on_compressed_image, this, _1);
     sub_compressed_image_ = create_subscription<CompressedImage>("src_image", qos, on_compressed_image);
 
+    if (is_bayer_) {
+      decoder_.set_gray();
+    }
+
+    // Parameters for scaling
     {
       const int num = declare_parameter<int>("scale_num");
       const int denom = declare_parameter<int>("scale_denom");
@@ -31,6 +36,7 @@ public:
       scale_ratio_ = static_cast<double>(num) / static_cast<double>(denom);
     }
 
+    // Parameters for cropping
     {
       declare_parameter<std::vector<int>>("crop_range");
       std::vector<int64_t> range = get_parameter("crop_range").as_integer_array();
@@ -38,10 +44,6 @@ public:
         decoder_.set_crop_range(range[0], range[1], range[2], range[3]);
         crop_range_ = cv::Rect2i(range[0], range[1], range[2], range[3]);
       }
-    }
-
-    if (is_bayer_) {
-      decoder_.set_gray();
     }
   }
 
@@ -58,25 +60,10 @@ private:
   {
     turbo_decoder::Timer timer;
     cv::Mat image;
-
-    if (use_imdecode_) {
-      if (is_bayer_) {
-        image = cv::imdecode(cv::Mat(msg.data), cv::IMREAD_GRAYSCALE);
-        image = turbo_decoder::convert_from_bayer(image, msg.format);
-      } else {
-        image = cv::imdecode(cv::Mat(msg.data), cv::IMREAD_COLOR);
-      }
-
-      if (crop_range_) {
-        image = image(crop_range_.value());
-      }
-      cv::resize(image, image, cv::Size(), scale_ratio_, scale_ratio_);
-    } else {
-      image = decoder_.decompress(msg.data);
-      if (is_bayer_) {
-        image = turbo_decoder::convert_from_bayer(image, msg.format);
-      }
-    }
+    if (use_imdecode_)
+      image = decompress_by_imdecode(msg);
+    else
+      image = decompress_by_turbo(msg);
 
     RCLCPP_INFO_STREAM(get_logger(), "image decompressed: " << timer);
 
@@ -84,6 +71,32 @@ private:
       cv::imshow("decompressed", image);
       cv::waitKey(10);
     }
+  }
+
+  cv::Mat decompress_by_turbo(const CompressedImage& msg)
+  {
+    cv::Mat image = decoder_.decompress(msg.data);
+    if (is_bayer_) {
+      image = turbo_decoder::convert_from_bayer(image, msg.format);
+    }
+    return image;
+  }
+
+  cv::Mat decompress_by_imdecode(const CompressedImage& msg)
+  {
+    cv::Mat image;
+    if (is_bayer_) {
+      image = cv::imdecode(cv::Mat(msg.data), cv::IMREAD_GRAYSCALE);
+      image = turbo_decoder::convert_from_bayer(image, msg.format);
+    } else {
+      image = cv::imdecode(cv::Mat(msg.data), cv::IMREAD_COLOR);
+    }
+
+    if (crop_range_) {
+      image = image(crop_range_.value());
+    }
+    cv::resize(image, image, cv::Size(), scale_ratio_, scale_ratio_);
+    return image;
   }
 };
 
