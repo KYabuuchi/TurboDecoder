@@ -14,10 +14,11 @@ I believe the following command will install `libjpeg-turbo`
 
 ## Supported options
 
-|  source |  x1  | scale | crop | crop & scale |
-| ------- | ---- | ----- | ---- | ------------ |
-|  RGB    |  O   |  O    |  O   |      O       |
-|  Bayer  |  O   |       |  O   |              |
+|  source |  x1                | scale              | crop               | crop & scale       |
+| :-----: | :----------------: | :----------------: | :----------------: | :----------------: |
+|  RGB    | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+|  Bayer  | :heavy_check_mark: |                    | :heavy_check_mark: |                    |
+
 
 ## How to run
 
