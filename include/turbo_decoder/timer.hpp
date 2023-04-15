@@ -2,7 +2,7 @@
 #include <chrono>
 #include <ostream>
 
-namespace jet_decoder
+namespace turbo_decoder
 {
 class Timer
 {
@@ -32,4 +32,4 @@ public:
 private:
   std::chrono::time_point<std::chrono::system_clock> start;
 };
-}  // namespace jet_decoder
+}  // namespace turbo_decoder

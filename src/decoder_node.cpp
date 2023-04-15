@@ -14,7 +14,7 @@ class Decoder : public rclcpp::Node
 public:
   using CompressedImage = sensor_msgs::msg::CompressedImage;
 
-  Decoder() : Node("jet_decoder"),
+  Decoder() : Node("turbo_decoder"),
               use_imdecode_(declare_parameter<bool>("use_imdecode", false)),
               use_imshow_(declare_parameter<bool>("use_imshow", false)),
               is_bayer_(declare_parameter<bool>("is_bayer", false))
@@ -56,7 +56,7 @@ private:
 
   void on_compressed_image(const CompressedImage& msg)
   {
-    jet_decoder::Timer timer;
+    turbo_decoder::Timer timer;
     cv::Mat image;
 
     if (use_imdecode_) {
@@ -73,6 +73,9 @@ private:
       cv::resize(image, image, cv::Size(), scale_ratio_, scale_ratio_);
     } else {
       image = decoder_.decompress_crop(msg.data);
+      if (is_bayer_) {
+        image = turbo_decoder::convert_from_bayer(image, msg.format);
+      }
     }
 
     RCLCPP_INFO_STREAM(get_logger(), "image decompressed: " << timer);

@@ -13,7 +13,7 @@ class DemoNode : public rclcpp::Node
 {
 public:
   using CompressedImage = sensor_msgs::msg::CompressedImage;
-  DemoNode() : Node("jet_decoder")
+  DemoNode() : Node("turbo_decoder")
   {
     using std::placeholders::_1;
     auto qos = rclcpp::QoS(10).best_effort();
@@ -39,8 +39,8 @@ private:
     // (The first process is slower because there is no data on the cache.)
     cv::imdecode(cv::Mat(msg.data), cv::IMREAD_COLOR);
 
-    // (1) jet_decoder
-    jet_decoder::Timer timer;
+    // (1) turbo_decoder
+    turbo_decoder::Timer timer;
     cv::Mat image1 = decoder_.decompress_using_cache(msg.data);
     const long time1 = timer.micro_seconds();
 
@@ -60,7 +60,7 @@ private:
 
     put_text(image1, time1, "turbo_decode");
     put_text(image2, time2, "cv::imdecode");
-    RCLCPP_INFO_STREAM(get_logger(), "jet: " << time1 / 1000. << " imdecode:" << time2 / 1000.);
+    RCLCPP_INFO_STREAM(get_logger(), "turbo: " << time1 / 1000. << " imdecode:" << time2 / 1000.);
 
     if (image1.size() != image2.size()) {
       using namespace std::literals::chrono_literals;

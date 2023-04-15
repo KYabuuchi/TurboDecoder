@@ -1,4 +1,5 @@
 #include "turbo_decoder/turbo_decoder.hpp"
+#include "turbo_decoder/timer.hpp"
 #include <iostream>
 
 namespace turbo_decoder
@@ -8,8 +9,6 @@ TurboDecoder::TurboDecoder()
   if ((tj_instance_ = tjInitDecompress()) == NULL) {
     std::cerr << tjGetErrorStr2(tj_instance_) << std::endl;
   }
-  scaling_factor_.num = 1;
-  scaling_factor_.denom = 1;
 
   if ((scaling_factors = tjGetScalingFactors(&num_scaling_factors)) == NULL) {
     std::cerr << tjGetErrorStr2(tj_instance_) << std::endl;
@@ -18,6 +17,9 @@ TurboDecoder::TurboDecoder()
   if ((tj_instance_ = tjInitTransform()) == NULL) {
     throw std::runtime_error(tjGetErrorStr2(tj_instance_));
   }
+
+  scaling_factor_.num = 1;
+  scaling_factor_.denom = 1;
 }
 
 void TurboDecoder::set_scale(int num, int denom)

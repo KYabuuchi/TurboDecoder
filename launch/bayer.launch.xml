@@ -3,7 +3,8 @@
     <arg name="scale_num" default="1"/>
     <arg name="scale_denom" default="1"/>
     <arg name="imshow" default="false"/>
-    <arg name="crop_range" default="[2240,1360,640,480]"/>
+    <arg name="crop_range" default="[640,160,640,480]"/>
+    <arg name="bayer" default="true"/>
 
     <node name="turbo_decode_node" pkg="turbo_decoder" exec="decoder_node" output="screen">
         <remap from="src_image" to="$(var src_image)"/>
@@ -11,6 +12,7 @@
         <param name="scale_denom" value="$(var scale_denom)"/>
         <param name="use_imshow" value="$(var imshow)"/>
         <param name="crop_range" value="$(var crop_range)"/>
+        <param name="is_bayer" value="$(var bayer)"/>
 
         <param name="use_imdecode" value="false"/>
     </node>
@@ -20,6 +22,7 @@
         <param name="scale_denom" value="$(var scale_denom)"/>
         <param name="use_imshow" value="$(var imshow)"/>
         <param name="crop_range" value="$(var crop_range)"/>
+        <param name="is_bayer" value="$(var bayer)"/>
 
         <param name="use_imdecode" value="true"/>
     </node>
