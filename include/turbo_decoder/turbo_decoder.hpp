@@ -21,6 +21,8 @@ public:
     pixel_format_ = TJPF_GRAY;
   }
 
+  cv::Mat decompress_crop(const std::vector<unsigned char>& jpeg_buf) const;
+
   cv::Mat decompress(const std::vector<unsigned char>& jpeg_buf) const;
 
   cv::Mat decompress_using_cache(const std::vector<unsigned char>& jpeg_buf) const;

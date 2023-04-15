@@ -20,7 +20,6 @@ ament_auto_find_build_dependencies()
 find_package(OpenCV REQUIRED)
 
 include(FindTurboJPEG.cmake)
-
 if(NOT TurboJPEG_FOUND)
   message(FATAL_ERROR "libjpeg-turbo not found")
 endif()

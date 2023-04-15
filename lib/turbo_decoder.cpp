@@ -14,6 +14,10 @@ TurboDecoder::TurboDecoder()
   if ((scaling_factors = tjGetScalingFactors(&num_scaling_factors)) == NULL) {
     std::cerr << tjGetErrorStr2(tj_instance_) << std::endl;
   }
+
+  if ((tj_instance_ = tjInitTransform()) == NULL) {
+    throw std::runtime_error(tjGetErrorStr2(tj_instance_));
+  }
 }
 
 void TurboDecoder::set_scale(int num, int denom)
@@ -78,6 +82,48 @@ cv::Mat TurboDecoder::decompress_using_cache(const std::vector<unsigned char>& j
     throw std::runtime_error(tjGetErrorStr2(tj_instance_));
   }
 
+  return image_buf;
+}
+
+cv::Mat TurboDecoder::decompress_crop(const std::vector<unsigned char>& jpeg_buf) const
+{
+  tjtransform xform{};
+  xform.r.x = 160;
+  xform.r.y = 640;
+  xform.r.w = 640;
+  xform.r.h = 480;
+  xform.options |= TJXOPT_CROP;
+
+  unsigned char* dst_buf = NULL;
+  unsigned long dst_size = 0;
+
+  const int flags = TJFLAG_FASTDCT;  // NOTE:
+
+  xform.options |= TJXOPT_TRIM;
+  if (tjTransform(tj_instance_, jpeg_buf.data(), jpeg_buf.size(), 1, &dst_buf, &dst_size, &xform, flags) < 0) {
+    tjFree(dst_buf);
+    throw std::runtime_error(tjGetErrorStr2(tj_instance_));
+  }
+
+  int src_width, src_height;
+  int src_sub_sample, src_color_space;
+  if (tjDecompressHeader3(tj_instance_, dst_buf, dst_size, &src_width, &src_height, &src_sub_sample, &src_color_space) < 0) {
+    throw std::runtime_error(tjGetErrorStr2(tj_instance_));
+  }
+
+  const int dst_width = TJSCALED(src_width, scaling_factor_);
+  const int dst_height = TJSCALED(src_height, scaling_factor_);
+
+  cv::Mat image_buf;
+  if (pixel_format_ == TJPF_GRAY) {
+    image_buf = cv::Mat(cv::Size(dst_width, dst_height), CV_8UC1);
+  } else {
+    image_buf = cv::Mat(cv::Size(dst_width, dst_height), CV_8UC3);
+  }
+
+  if (tjDecompress2(tj_instance_, dst_buf, dst_size, image_buf.data, dst_width, 0, dst_height, pixel_format_, flags) < 0) {
+    throw std::runtime_error(tjGetErrorStr2(tj_instance_));
+  }
   return image_buf;
 }
 
