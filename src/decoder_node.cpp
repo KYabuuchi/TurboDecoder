@@ -8,11 +8,13 @@
 #include <opencv2/core.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
+#include <std_msgs/msg/float32.hpp>
 
 class Decoder : public rclcpp::Node
 {
 public:
   using CompressedImage = sensor_msgs::msg::CompressedImage;
+  using Float32 = std_msgs::msg::Float32;
 
   Decoder() : Node("turbo_decoder"),
               use_imdecode_(declare_parameter<bool>("use_imdecode", false)),
@@ -23,6 +25,7 @@ public:
     auto qos = rclcpp::QoS(10).best_effort();
     auto on_compressed_image = std::bind(&Decoder::on_compressed_image, this, _1);
     sub_compressed_image_ = create_subscription<CompressedImage>("src_image", qos, on_compressed_image);
+    pub_proc_time_ = create_publisher<Float32>("proc_time", 10);
 
     if (is_bayer_) {
       decoder_.set_gray();
@@ -55,6 +58,7 @@ private:
   std::optional<cv::Rect2i> crop_range_{std::nullopt};
   turbo_decoder::TurboDecoder decoder_;
   rclcpp::Subscription<CompressedImage>::SharedPtr sub_compressed_image_;
+  rclcpp::Publisher<Float32>::SharedPtr pub_proc_time_;
 
   void on_compressed_image(const CompressedImage& msg)
   {
@@ -66,6 +70,12 @@ private:
       image = decompress_by_turbo(msg);
 
     RCLCPP_INFO_STREAM(get_logger(), "image decompressed: " << timer);
+
+    {
+      Float32 time_msg;
+      time_msg.data = timer.micro_seconds() / 1000.0;
+      pub_proc_time_->publish(time_msg);
+    }
 
     if (use_imshow_) {
       cv::imshow("decompressed", image);

@@ -8,6 +8,8 @@
 
     <node name="turbo_decode_node" pkg="turbo_decoder" exec="decoder_node" output="screen">
         <remap from="src_image" to="$(var src_image)"/>
+        <remap from="proc_time" to="/turbo/proc_time"/>
+
         <param name="scale_num" value="$(var scale_num)"/>
         <param name="scale_denom" value="$(var scale_denom)"/>
         <param name="use_imshow" value="$(var imshow)"/>
@@ -18,6 +20,8 @@
     </node>
     <node name="opencv_decode_node" pkg="turbo_decoder" exec="decoder_node" output="screen">
         <remap from="src_image" to="$(var src_image)"/>
+        <remap from="proc_time" to="/imdecode/proc_time"/>
+
         <param name="scale_num" value="$(var scale_num)"/>
         <param name="scale_denom" value="$(var scale_denom)"/>
         <param name="use_imshow" value="$(var imshow)"/>
